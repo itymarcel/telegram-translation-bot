@@ -28,6 +28,11 @@ export class TelegramClient {
   private setupEventHandlers() {
     // Handle polling errors
     this.bot.on('polling_error', (error) => {
+      // Ignore 409 conflicts - happens during deployments/restarts
+      if (error.response?.statusCode === 409) {
+        console.log('Polling conflict detected - another instance may be running. This will resolve automatically.');
+        return;
+      }
       console.error('Telegram polling error:', error);
       this.callbacks.onError?.(error);
     });
