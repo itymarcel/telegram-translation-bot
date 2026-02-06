@@ -1,0 +1,37 @@
+# Don't deploy these to Railway
+
+# Development files
+*.md
+!README.md
+.git
+.gitignore
+
+# Documentation (not needed in production)
+TELEGRAM_SETUP.md
+TELEGRAM_CONVERSION_SUMMARY.md
+IMPLEMENTATION_SUMMARY.md
+QUICKSTART.md
+STATUS.md
+NEXT_STEPS.md
+readme-old.md
+
+# Frontend (deploy separately if needed)
+frontend/
+
+# Local data
+backend/data/
+*.sqlite
+*.sqlite-journal
+
+# Environment files (use Railway vars instead)
+.env
+.env.local
+.env.example
+
+# IDE
+.vscode/
+.idea/
+
+# Temporary files
+*.log
+.DS_Store
