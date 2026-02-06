@@ -7,20 +7,36 @@ export type TelegramEventCallback = {
   onError?: (error: Error) => void;
 };
 
+export type TelegramClientConfig = {
+  useWebhook?: boolean;
+  webhookUrl?: string;
+};
+
 export class TelegramClient {
   private bot: TelegramBot;
   private status: TelegramStatus;
   private callbacks: TelegramEventCallback;
+  private config: TelegramClientConfig;
+  private token: string;
 
-  constructor(token: string, callbacks: TelegramEventCallback = {}) {
+  constructor(
+    token: string,
+    callbacks: TelegramEventCallback = {},
+    config: TelegramClientConfig = {}
+  ) {
+    this.token = token;
     this.callbacks = callbacks;
+    this.config = config;
     this.status = {
       connected: false,
       ready: false,
     };
 
-    // Initialize bot
-    this.bot = new TelegramBot(token, { polling: true });
+    // Initialize bot based on mode
+    const useWebhook = config.useWebhook ?? false;
+    this.bot = new TelegramBot(token, { polling: !useWebhook });
+
+    console.log(`Telegram bot mode: ${useWebhook ? 'webhook' : 'polling'}`);
 
     this.setupEventHandlers();
   }
@@ -97,6 +113,18 @@ Commands:
       // Get bot info
       const botInfo = await this.bot.getMe();
 
+      // Set up webhook if in webhook mode
+      if (this.config.useWebhook && this.config.webhookUrl) {
+        console.log(`Setting up webhook at: ${this.config.webhookUrl}`);
+        await this.bot.setWebHook(`${this.config.webhookUrl}/api/telegram/webhook`);
+        const webhookInfo = await this.bot.getWebHookInfo();
+        console.log('Webhook set successfully:', webhookInfo.url);
+      } else if (!this.config.useWebhook) {
+        // Delete any existing webhook if using polling
+        await this.bot.deleteWebHook();
+        console.log('Webhook deleted - using polling mode');
+      }
+
       this.status.connected = true;
       this.status.ready = true;
       this.status.botUsername = botInfo.username;
@@ -125,6 +153,20 @@ Commands:
     }
   }
 
+  /**
+   * Process webhook update (call this from webhook endpoint)
+   */
+  processUpdate(update: TelegramBot.Update): void {
+    this.bot.processUpdate(update);
+  }
+
+  /**
+   * Get the underlying bot instance (for webhook endpoint)
+   */
+  getBot(): TelegramBot {
+    return this.bot;
+  }
+
   getStatus(): TelegramStatus {
     return { ...this.status };
   }
@@ -134,6 +176,14 @@ Commands:
   }
 
   async destroy(): Promise<void> {
-    await this.bot.stopPolling();
+    if (this.config.useWebhook) {
+      // Delete webhook
+      await this.bot.deleteWebHook();
+      console.log('Webhook deleted');
+    } else {
+      // Stop polling
+      await this.bot.stopPolling();
+      console.log('Polling stopped');
+    }
   }
 }

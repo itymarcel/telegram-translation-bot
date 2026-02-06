@@ -20,6 +20,8 @@ const FRONTEND_URL = process.env.FRONTEND_URL || 'http://localhost:5173';
 const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
 const OPENAI_MODEL = process.env.OPENAI_MODEL || 'gpt-4-turbo-preview';
 const TELEGRAM_BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN;
+const TELEGRAM_USE_WEBHOOK = process.env.TELEGRAM_USE_WEBHOOK === 'true';
+const WEBHOOK_URL = process.env.WEBHOOK_URL; // e.g., https://your-app.up.railway.app
 
 if (!OPENAI_API_KEY) {
   console.error('ERROR: OPENAI_API_KEY is not set in environment variables');
@@ -29,6 +31,12 @@ if (!OPENAI_API_KEY) {
 if (!TELEGRAM_BOT_TOKEN) {
   console.error('ERROR: TELEGRAM_BOT_TOKEN is not set in environment variables');
   console.error('Get your token from @BotFather on Telegram');
+  process.exit(1);
+}
+
+if (TELEGRAM_USE_WEBHOOK && !WEBHOOK_URL) {
+  console.error('ERROR: WEBHOOK_URL is required when TELEGRAM_USE_WEBHOOK is true');
+  console.error('Set WEBHOOK_URL to your Railway backend URL (e.g., https://your-app.up.railway.app)');
   process.exit(1);
 }
 
@@ -60,24 +68,42 @@ app.use('/api/', limiter);
 
 // Initialize services
 const translator = new OpenAITranslator(OPENAI_API_KEY, OPENAI_MODEL);
-const telegramClient = new TelegramClient(TELEGRAM_BOT_TOKEN, {
-  onReady: (botInfo) => {
-    console.log('Telegram bot ready:', botInfo);
-    io.emit('telegram-ready', botInfo);
+const telegramClient = new TelegramClient(
+  TELEGRAM_BOT_TOKEN,
+  {
+    onReady: (botInfo) => {
+      console.log('Telegram bot ready:', botInfo);
+      io.emit('telegram-ready', botInfo);
+    },
+    onMessage: async (message) => {
+      console.log('Message received from Telegram');
+      const messageHandler = new MessageHandler(telegramClient, translator);
+      await messageHandler.handleMessage(message);
+      io.emit('message-received', {
+        chatId: message.chat.id.toString(),
+        message: message.text,
+      });
+    },
+    onError: (error) => {
+      console.error('Telegram error:', error);
+      io.emit('telegram-error', error.message);
+    },
   },
-  onMessage: async (message) => {
-    console.log('Message received from Telegram');
-    const messageHandler = new MessageHandler(telegramClient, translator);
-    await messageHandler.handleMessage(message);
-    io.emit('message-received', {
-      chatId: message.chat.id.toString(),
-      message: message.text,
-    });
-  },
-  onError: (error) => {
-    console.error('Telegram error:', error);
-    io.emit('telegram-error', error.message);
-  },
+  {
+    useWebhook: TELEGRAM_USE_WEBHOOK,
+    webhookUrl: WEBHOOK_URL,
+  }
+);
+
+// Webhook endpoint for Telegram (must be before other routes to avoid rate limiting)
+app.post('/api/telegram/webhook', (req, res) => {
+  try {
+    telegramClient.processUpdate(req.body);
+    res.sendStatus(200);
+  } catch (error) {
+    console.error('Error processing webhook update:', error);
+    res.sendStatus(500);
+  }
 });
 
 // API Routes
