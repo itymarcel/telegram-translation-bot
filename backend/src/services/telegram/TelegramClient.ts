@@ -17,14 +17,12 @@ export class TelegramClient {
   private status: TelegramStatus;
   private callbacks: TelegramEventCallback;
   private config: TelegramClientConfig;
-  private token: string;
 
   constructor(
     token: string,
     callbacks: TelegramEventCallback = {},
     config: TelegramClientConfig = {}
   ) {
-    this.token = token;
     this.callbacks = callbacks;
     this.config = config;
     this.status = {
@@ -43,7 +41,7 @@ export class TelegramClient {
 
   private setupEventHandlers() {
     // Handle polling errors
-    this.bot.on('polling_error', (error) => {
+    this.bot.on('polling_error', (error: any) => {
       // Ignore 409 conflicts - happens during deployments/restarts
       if (error.response?.statusCode === 409) {
         console.log('Polling conflict detected - another instance may be running. This will resolve automatically.');
