@@ -80,24 +80,41 @@ export class OpenAITranslator {
 
 For the Italian ${sourceLang === 'it' ? 'input' : 'translation'}, provide:
 
-1. **Translation**: The accurate ${targetLangName} translation
-2. **Related Italian Words**: 3-4 Italian words/phrases related to the Italian term (synonyms, same word family, or contextually related)
-3. **Other Ways to Say It**: 2-3 alternative Italian phrases with the same or similar meaning
+1. **Translation**: The accurate ${targetLangName} translation (NEVER include brackets or placeholders, always provide the actual translation)
+2. **Related Italian Words**: 3-4 Italian words from the same context or topic (NOT synonyms for "other ways to say it", but related vocabulary). Format: "Italian word - English meaning"
+3. **Other Ways to Say It**: 2-3 alternative Italian phrases with the same or similar meaning. Format: "Italian phrase - English translation"
 
-Format your response like this:
+Format your response EXACTLY like this:
 🔤 Translation
-[The ${targetLangName} translation]
+[The actual ${targetLangName} translation here]
 
 📚 Related Italian Words
-• [Italian word/phrase 1] - [English meaning]
-• [Italian word/phrase 2] - [English meaning]
-• [Italian word/phrase 3] - [English meaning]
-• [Italian word/phrase 4] - [English meaning]
+• [Italian word 1] - [English meaning 1]
+• [Italian word 2] - [English meaning 2]
+• [Italian word 3] - [English meaning 3]
+• [Italian word 4] - [English meaning 4]
 
-🔄 Other Ways to Say It (in Italian)
-• [alternative Italian phrase 1]
-• [alternative Italian phrase 2]
-• [alternative Italian phrase 3]
+🔄 Other Ways to Say It
+• [Italian alternative 1] - [English translation 1]
+• [Italian alternative 2] - [English translation 2]
+• [Italian alternative 3] - [English translation 3]
+
+Example:
+If input is "All good?":
+
+🔤 Translation
+Tutto bene?
+
+📚 Related Italian Words
+• bene - well/good
+• male - bad
+• così così - so-so
+• benissimo - very well
+
+🔄 Other Ways to Say It
+• Va tutto bene? - Is everything okay?
+• Tutto a posto? - Everything in order?
+• Come va? - How's it going?
 
 Keep it concise and practical. Focus on useful vocabulary for learning Italian.`;
 
