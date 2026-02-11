@@ -33,23 +33,6 @@ export class MessageHandler {
         word_of_hour_enabled: false,
       });
 
-      // Handle /start command with welcome message
-      if (text.trim() === '/start') {
-        const welcomeMessage = `👋 Ciao! Welcome to your Italian-English Translation Bot!
-
-I can help you learn Italian by translating between English and Italian.
-
-🇬🇧 → 🇮🇹 **Send me English**, and I'll translate it to Italian with related vocabulary and alternative ways to say it.
-
-🇮🇹 → 🇬🇧 **Send me Italian**, and I'll translate it to English with related vocabulary and alternative ways to say it.
-
-Just send any message to get started! 🚀`;
-
-        await this.telegramClient.sendMessage(chatId, welcomeMessage);
-        console.log(`Welcome message sent to ${userName}`);
-        return;
-      }
-
       // Show typing indicator
       // Note: Telegram doesn't have a typing indicator in the API like WhatsApp
 

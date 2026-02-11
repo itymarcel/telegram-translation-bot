@@ -62,17 +62,15 @@ export class TelegramClient {
     // Handle /start command
     this.bot.onText(/\/start/, (msg) => {
       const chatId = msg.chat.id;
-      const welcomeMessage = `
-Welcome to the Italian-English Translation Bot! 🇮🇹 🇬🇧
+      const welcomeMessage = `👋 Ciao! Welcome to your Italian-English Translation Bot!
 
-Send me a message in Italian or English, and I'll translate it for you!
+I can help you learn Italian by translating between English and Italian.
 
-Examples:
-• Ciao! Come stai? → Hello! How are you?
-• Good morning! → Buongiorno!
+🇬🇧 → 🇮🇹 **Send me English**, and I'll translate it to Italian with related vocabulary and alternative ways to say it.
 
-Just start sending messages to get translations.
-      `.trim();
+🇮🇹 → 🇬🇧 **Send me Italian**, and I'll translate it to English with related vocabulary and alternative ways to say it.
+
+Just send any message to get started! 🚀`;
 
       this.bot.sendMessage(chatId, welcomeMessage);
     });
