@@ -12,23 +12,42 @@ export class OpenAITranslator {
   }
 
   async detectLanguage(text: string): Promise<DetectedLanguage> {
-    // Simple heuristic: check for Italian-specific characters and common words
+    // Check for Italian indicators. If not Italian, assume English.
     const italianIndicators = [
-      'è', 'à', 'ì', 'ò', 'ù',
-      'il', 'la', 'lo', 'gli', 'le', 'di', 'da', 'in', 'su', 'a',
-      'che', 'per', 'una', 'sono', 'con', 'della', 'dei', 'nel', 'anche',
-      'questo', 'questa', 'molto', 'più', 'può', 'però'
-    ];
-
-    const englishIndicators = [
-      'the', 'is', 'are', 'was', 'were', 'been', 'have', 'has', 'had',
-      'this', 'that', 'these', 'those', 'with', 'from', 'about'
+      // Italian-specific accented characters
+      'è', 'à', 'ì', 'ò', 'ù', 'é',
+      // Articles
+      'il', 'lo', 'la', 'i', 'gli', 'le', 'un', 'uno', 'una',
+      // Common prepositions
+      'di', 'a', 'da', 'in', 'con', 'su', 'per', 'tra', 'fra', 'del', 'dello', 'della', 'dei', 'degli', 'delle',
+      'al', 'allo', 'alla', 'ai', 'agli', 'alle', 'dal', 'dallo', 'dalla', 'dai', 'dagli', 'dalle',
+      'nel', 'nello', 'nella', 'nei', 'negli', 'nelle', 'sul', 'sullo', 'sulla', 'sui', 'sugli', 'sulle',
+      // Common verbs and conjugations
+      'sono', 'sei', 'è', 'siamo', 'siete', 'essere', 'ho', 'hai', 'ha', 'abbiamo', 'avete', 'hanno', 'avere',
+      'faccio', 'fai', 'fa', 'facciamo', 'fate', 'fanno', 'fare',
+      'vado', 'vai', 'va', 'andiamo', 'andate', 'vanno', 'andare',
+      'dico', 'dici', 'dice', 'diciamo', 'dite', 'dicono', 'dire',
+      'vengo', 'vieni', 'viene', 'veniamo', 'venite', 'vengono', 'venire',
+      'posso', 'puoi', 'può', 'possiamo', 'potete', 'possono', 'potere',
+      'voglio', 'vuoi', 'vuole', 'vogliamo', 'volete', 'vogliono', 'volere',
+      'devo', 'devi', 'deve', 'dobbiamo', 'dovete', 'devono', 'dovere',
+      // Common pronouns
+      'io', 'tu', 'lui', 'lei', 'noi', 'voi', 'loro', 'mi', 'ti', 'si', 'ci', 'vi',
+      'me', 'te', 'se', 'lo', 'gli', 'ne',
+      // Common adjectives
+      'bello', 'bella', 'buono', 'buona', 'grande', 'piccolo', 'piccola', 'nuovo', 'nuova', 'vecchio', 'vecchia',
+      'molto', 'molta', 'molti', 'molte', 'poco', 'poca', 'pochi', 'poche', 'tutto', 'tutta', 'tutti', 'tutte',
+      // Common words
+      'che', 'ma', 'o', 'e', 'anche', 'quando', 'dove', 'come', 'perché', 'se',
+      'questo', 'questa', 'questi', 'queste', 'quello', 'quella', 'quelli', 'quelle',
+      'più', 'meno', 'ancora', 'già', 'sempre', 'mai', 'non', 'sì', 'no',
+      // Common nouns
+      'casa', 'giorno', 'tempo', 'anno', 'vita', 'uomo', 'donna', 'bambino', 'bambina',
+      'ciao', 'grazie', 'prego', 'scusa', 'per favore', 'buongiorno', 'buonasera', 'arrivederci'
     ];
 
     const lowerText = text.toLowerCase();
-
     let italianScore = 0;
-    let englishScore = 0;
 
     for (const indicator of italianIndicators) {
       if (lowerText.includes(indicator)) {
@@ -36,49 +55,13 @@ export class OpenAITranslator {
       }
     }
 
-    for (const indicator of englishIndicators) {
-      if (lowerText.includes(indicator)) {
-        englishScore++;
-      }
-    }
-
-    // If no clear indicators, use OpenAI for detection
-    if (italianScore === 0 && englishScore === 0) {
-      try {
-        const response = await this.openai.chat.completions.create({
-          model: this.model,
-          messages: [
-            {
-              role: 'system',
-              content: 'You are a language detector. Respond with only "it" for Italian or "en" for English.',
-            },
-            {
-              role: 'user',
-              content: `Detect the language of this text: "${text}"`,
-            },
-          ],
-          temperature: 0,
-          max_tokens: 10,
-        });
-
-        const detected = response.choices[0]?.message?.content?.trim().toLowerCase();
-        if (detected === 'it' || detected === 'en') {
-          return { language: detected as Language, confidence: 0.8 };
-        }
-      } catch (error) {
-        console.error('Error detecting language with OpenAI:', error);
-      }
-
-      return { language: 'unknown', confidence: 0 };
-    }
-
-    if (italianScore > englishScore) {
+    // If we found Italian indicators, it's Italian
+    if (italianScore > 0) {
       return { language: 'it', confidence: Math.min(italianScore / 3, 1) };
-    } else if (englishScore > italianScore) {
-      return { language: 'en', confidence: Math.min(englishScore / 3, 1) };
     }
 
-    return { language: 'unknown', confidence: 0 };
+    // Otherwise, it's English
+    return { language: 'en', confidence: 1 };
   }
 
   async translate(text: string, sourceLang: Language, targetLang: Language): Promise<string> {
@@ -89,37 +72,34 @@ export class OpenAITranslator {
       return cached;
     }
 
-    const sourceLangName = sourceLang === 'it' ? 'Italian' : 'English';
     const targetLangName = targetLang === 'it' ? 'Italian' : 'English';
 
     try {
-      let systemPrompt: string;
+      // Always provide Italian learning context regardless of input language
+      const systemPrompt = `You are an expert Italian language teacher. When translating between Italian and English, always provide educational context to help learn Italian.
 
-      if (sourceLang === 'en') {
-        // English to Italian: Just provide the translation
-        systemPrompt = `You are an expert translator. Translate the following English text to Italian. Provide ONLY the translation, nothing else.`;
-      } else {
-        // Italian to English: Provide translation with practical usage context
-        systemPrompt = `You are an expert language teacher specializing in ${sourceLangName} and ${targetLangName}. When translating, provide:
+For the Italian ${sourceLang === 'it' ? 'input' : 'translation'}, provide:
 
-1. **Translation**: The accurate translation
-2. **Usage Context**: How and when to use this phrase/word in real situations (e.g., formal vs informal settings, common scenarios)
-3. **Example Situations**: 2-3 brief examples of when you'd use this
+1. **Translation**: The accurate ${targetLangName} translation
+2. **Related Italian Words**: 3-4 Italian words/phrases related to the Italian term (synonyms, same word family, or contextually related)
+3. **Other Ways to Say It**: 2-3 alternative Italian phrases with the same or similar meaning
 
 Format your response like this:
 🔤 Translation
-[The translation]
+[The ${targetLangName} translation]
 
-💡 How to Use It
-[Practical usage context - when and how to use this in conversation]
+📚 Related Italian Words
+• [Italian word/phrase 1] - [English meaning]
+• [Italian word/phrase 2] - [English meaning]
+• [Italian word/phrase 3] - [English meaning]
+• [Italian word/phrase 4] - [English meaning]
 
-📝 Example Situations
-• [situation 1]
-• [situation 2]
-• [situation 3]
+🔄 Other Ways to Say It (in Italian)
+• [alternative Italian phrase 1]
+• [alternative Italian phrase 2]
+• [alternative Italian phrase 3]
 
-Keep it concise and practical. Focus on real-world usage rather than grammar theory.`;
-      }
+Keep it concise and practical. Focus on useful vocabulary for learning Italian.`;
 
       const response = await this.openai.chat.completions.create({
         model: this.model,
@@ -154,12 +134,7 @@ Keep it concise and practical. Focus on real-world usage rather than grammar the
   }
 
   async translateWithDetection(text: string): Promise<{ translation: string; sourceLang: Language; targetLang: Language }> {
-    const { language: sourceLang, confidence } = await this.detectLanguage(text);
-
-    if (sourceLang === 'unknown' || confidence < 0.5) {
-      throw new Error('Could not reliably detect language');
-    }
-
+    const { language: sourceLang } = await this.detectLanguage(text);
     const targetLang: Language = sourceLang === 'it' ? 'en' : 'it';
     const translation = await this.translate(text, sourceLang, targetLang);
 

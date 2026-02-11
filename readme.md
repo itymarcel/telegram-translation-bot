@@ -40,10 +40,26 @@ npm run dev
 
 1. Search for your bot on Telegram (e.g., @mytranslation_bot)
 2. Click START
-3. Send: "Ciao! Come stai?"
-4. Get: "Hello! How are you?"
+3. You'll see a welcome message explaining how to use the bot
+4. Send: "Ciao! Come stai?"
+5. Get translation with Italian vocabulary tips!
 
 **That's it!** 🎉
+
+## 👥 Sharing Your Bot
+
+Anyone can use your bot! Share it with friends and family:
+
+**Share via link:**
+```
+https://t.me/your_bot_username
+```
+(Replace `your_bot_username` with your actual bot username without the @)
+
+**Share via search:**
+Tell them to search for `@your_bot_username` in Telegram
+
+The bot is **public by default** - anyone can chat with it and learn Italian!
 
 ## 📋 Prerequisites
 
@@ -57,25 +73,40 @@ See [TELEGRAM_SETUP.md](./TELEGRAM_SETUP.md) for step-by-step instructions with 
 
 ## 💬 Example Usage
 
-### English to Italian (Direct Translation)
+### English to Italian
 ```
 You: I would like a coffee please
-Bot: Vorrei un caffè per favore
+Bot: 🔤 Translation
+Vorrei un caffè per favore
+
+📚 Related Italian Words
+• desiderare - to desire/wish
+• ordinare - to order
+• caffè espresso - espresso coffee
+• bar/caffetteria - café
+
+🔄 Other Ways to Say It (in Italian)
+• Prendo un caffè, grazie
+• Mi piacerebbe un caffè, per cortesia
+• Posso avere un caffè, per favore?
 ```
 
-### Italian to English (Translation + Usage Context)
+### Italian to English
 ```
 You: Ciao! Come stai oggi?
 Bot: 🔤 Translation
 Hello! How are you today?
 
-💡 How to Use It
-This is a common casual greeting used when meeting friends, family, or acquaintances. Use it in informal settings.
+📚 Related Italian Words
+• salve - hello (formal)
+• buongiorno - good morning
+• come va - how's it going
+• tutto bene - all good
 
-📝 Example Situations
-• Meeting a friend for coffee
-• Greeting a colleague you know well
-• Starting a casual conversation with someone you're familiar with
+🔄 Other Ways to Say It (in Italian)
+• Come va oggi?
+• Come te la passi?
+• Tutto bene?
 ```
 
 ## 🛠️ Tech Stack
