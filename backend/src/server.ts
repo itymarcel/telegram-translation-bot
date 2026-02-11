@@ -157,8 +157,8 @@ app.use((err: any, _req: express.Request, res: express.Response, _next: express.
 async function start() {
   try {
     // Start HTTP server first
-    httpServer.listen(PORT, () => {
-      console.log(`Server running on http://localhost:${PORT}`);
+    httpServer.listen(Number(PORT), '0.0.0.0', () => {
+      console.log(`Server running on http://0.0.0.0:${PORT}`);
       console.log(`WebSocket server ready`);
     });
 
