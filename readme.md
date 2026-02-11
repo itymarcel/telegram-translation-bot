@@ -7,8 +7,8 @@ Your personal Telegram bot that instantly translates between Italian and English
 - **Instant Translation**: Send a message in Italian or English, get back the translation
 - **Automatic Language Detection**: No need to specify the language
 - **Private Bot**: Only you can use it (unless you share the username)
-- **Translation History**: View all your translations in the web dashboard
-- **Statistics**: Track your usage and learning progress
+- **Smart Context**: Italian translations include practical usage tips; English translations are direct
+- **Translation History**: SQLite database stores all translations
 - **Simple Setup**: Create your bot in 5 minutes
 
 ## 🚀 Quick Start
@@ -57,38 +57,33 @@ See [TELEGRAM_SETUP.md](./TELEGRAM_SETUP.md) for step-by-step instructions with 
 
 ## 💬 Example Usage
 
+### English to Italian (Direct Translation)
 ```
-You: Ciao! Come stai oggi?
-Bot: Hello! How are you today?
-
 You: I would like a coffee please
 Bot: Vorrei un caffè per favore
-
-You: Dov'è il bagno?
-Bot: Where is the bathroom?
-
-You: What's the weather like?
-Bot: Com'è il tempo?
 ```
 
-## 🖥️ Web Dashboard
+### Italian to English (Translation + Usage Context)
+```
+You: Ciao! Come stai oggi?
+Bot: 🔤 Translation
+Hello! How are you today?
 
-Open `http://localhost:5173` to view:
+💡 How to Use It
+This is a common casual greeting used when meeting friends, family, or acquaintances. Use it in informal settings.
 
-- **Real-time bot status**
-- **All your chats** with the bot
-- **Translation history** searchable and filterable
-- **Statistics** (total translations, language distribution)
-- **Settings** (update API keys)
+📝 Example Situations
+• Meeting a friend for coffee
+• Greeting a colleague you know well
+• Starting a casual conversation with someone you're familiar with
+```
 
 ## 🛠️ Tech Stack
 
 - **Bot Platform**: Telegram Bot API
 - **Backend**: Node.js + Express + TypeScript
-- **Frontend**: React + TypeScript + Vite
 - **Translation**: OpenAI GPT-4
 - **Database**: SQLite
-- **Real-time**: Socket.IO
 
 ## 📁 Project Structure
 
@@ -103,12 +98,6 @@ whatsapp-cli/
 │   │   ├── routes/            # REST API endpoints
 │   │   └── server.ts          # Main entry point
 │   └── .env                   # Configuration
-│
-├── frontend/         # React dashboard
-│   └── src/
-│       ├── pages/             # Dashboard, Chats, etc.
-│       ├── hooks/             # WebSocket integration
-│       └── services/          # API client
 │
 └── shared/           # TypeScript types
 ```
@@ -131,15 +120,9 @@ OPENAI_MODEL=gpt-4-turbo-preview
 # Database
 DATABASE_PATH=./data/database.sqlite
 
-# Frontend URL
-FRONTEND_URL=http://localhost:5173
-```
-
-### Frontend (.env)
-
-```env
-VITE_API_URL=http://localhost:3000
-VITE_WS_URL=ws://localhost:3000
+# For production deployment with webhooks (optional)
+TELEGRAM_USE_WEBHOOK=false
+WEBHOOK_URL=https://your-app.up.railway.app
 ```
 
 ## 📡 API Endpoints
@@ -221,18 +204,10 @@ See [RAILWAY_DEPLOYMENT.md](./RAILWAY_DEPLOYMENT.md) for detailed instructions.
 
 ## 🚀 Development
 
-### Backend Development
+### Running in Development
 
 ```bash
-cd backend
 npm run dev    # Auto-restarts on changes
-```
-
-### Frontend Development
-
-```bash
-cd frontend
-npm run dev    # Hot reload enabled
 ```
 
 ### Type Checking

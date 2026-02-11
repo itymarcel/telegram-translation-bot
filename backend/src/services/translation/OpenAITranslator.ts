@@ -93,38 +93,40 @@ export class OpenAITranslator {
     const targetLangName = targetLang === 'it' ? 'Italian' : 'English';
 
     try {
-      const response = await this.openai.chat.completions.create({
-        model: this.model,
-        messages: [
-          {
-            role: 'system',
-            content: `You are an expert language teacher specializing in ${sourceLangName} and ${targetLangName}. When translating, provide:
+      let systemPrompt: string;
+
+      if (sourceLang === 'en') {
+        // English to Italian: Just provide the translation
+        systemPrompt = `You are an expert translator. Translate the following English text to Italian. Provide ONLY the translation, nothing else.`;
+      } else {
+        // Italian to English: Provide translation with practical usage context
+        systemPrompt = `You are an expert language teacher specializing in ${sourceLangName} and ${targetLangName}. When translating, provide:
 
 1. **Translation**: The accurate translation
-2. **Context**: Brief explanation of usage or meaning
-3. **Related Words**: 2-3 related vocabulary words
-4. **Alternatives**: Other ways to express the same idea
-5. **Grammar Note**: Any interesting conjugation, formation, or linguistic notes
+2. **Usage Context**: How and when to use this phrase/word in real situations (e.g., formal vs informal settings, common scenarios)
+3. **Example Situations**: 2-3 brief examples of when you'd use this
 
 Format your response like this:
 🔤 Translation
 [The translation]
 
-💡 Context
-[Brief context or usage note]
+💡 How to Use It
+[Practical usage context - when and how to use this in conversation]
 
-📚 Related Words
-• [word 1] - [meaning]
-• [word 2] - [meaning]
+📝 Example Situations
+• [situation 1]
+• [situation 2]
+• [situation 3]
 
-🔄 Alternatives
-• [alternative phrase 1]
-• [alternative phrase 2]
+Keep it concise and practical. Focus on real-world usage rather than grammar theory.`;
+      }
 
-📖 Grammar Note
-[Any interesting grammatical or linguistic insight]
-
-Keep it concise and educational. If the input is a single word, focus on vocabulary and usage. If it's a sentence, focus on context and alternatives.`,
+      const response = await this.openai.chat.completions.create({
+        model: this.model,
+        messages: [
+          {
+            role: 'system',
+            content: systemPrompt,
           },
           {
             role: 'user',

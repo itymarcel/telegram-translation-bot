@@ -1,6 +1,5 @@
 import express from 'express';
 import { createServer } from 'http';
-import { Server } from 'socket.io';
 import cors from 'cors';
 import helmet from 'helmet';
 import rateLimit from 'express-rate-limit';
@@ -16,7 +15,6 @@ import configRouter from './routes/config.js';
 dotenv.config();
 
 const PORT = process.env.PORT || 3000;
-const FRONTEND_URL = process.env.FRONTEND_URL || 'http://localhost:5173';
 const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
 const OPENAI_MODEL = process.env.OPENAI_MODEL || 'gpt-4-turbo-preview';
 const TELEGRAM_BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN;
@@ -44,20 +42,10 @@ if (TELEGRAM_USE_WEBHOOK && !WEBHOOK_URL) {
 const app = express();
 const httpServer = createServer(app);
 
-// Initialize Socket.IO
-const io = new Server(httpServer, {
-  cors: {
-    origin: FRONTEND_URL,
-    methods: ['GET', 'POST'],
-  },
-});
-
 // Middleware
 app.set('trust proxy', 1); // Trust Railway's proxy
 app.use(helmet());
-app.use(cors({
-  origin: FRONTEND_URL,
-}));
+app.use(cors());
 app.use(express.json());
 
 // Rate limiting
@@ -74,20 +62,14 @@ const telegramClient = new TelegramClient(
   {
     onReady: (botInfo) => {
       console.log('Telegram bot ready:', botInfo);
-      io.emit('telegram-ready', botInfo);
     },
     onMessage: async (message) => {
       console.log('Message received from Telegram');
       const messageHandler = new MessageHandler(telegramClient, translator);
       await messageHandler.handleMessage(message);
-      io.emit('message-received', {
-        chatId: message.chat.id.toString(),
-        message: message.text,
-      });
     },
     onError: (error) => {
       console.error('Telegram error:', error);
-      io.emit('telegram-error', error.message);
     },
   },
   {
@@ -132,19 +114,6 @@ app.get('/api/health', (_req, res) => {
   });
 });
 
-// Socket.IO connection handling
-io.on('connection', (socket) => {
-  console.log('Client connected:', socket.id);
-
-  // Send current Telegram status on connection
-  const status = telegramClient.getStatus();
-  socket.emit('telegram-status', status);
-
-  socket.on('disconnect', () => {
-    console.log('Client disconnected:', socket.id);
-  });
-});
-
 // Error handling middleware
 app.use((err: any, _req: express.Request, res: express.Response, _next: express.NextFunction) => {
   console.error('Error:', err);
@@ -160,7 +129,6 @@ async function start() {
     // Start HTTP server first
     httpServer.listen(Number(PORT), '0.0.0.0', () => {
       console.log(`Server running on http://0.0.0.0:${PORT}`);
-      console.log(`WebSocket server ready`);
     });
 
     // Initialize Telegram bot
