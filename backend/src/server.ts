@@ -53,6 +53,7 @@ const io = new Server(httpServer, {
 });
 
 // Middleware
+app.set('trust proxy', 1); // Trust Railway's proxy
 app.use(helmet());
 app.use(cors({
   origin: FRONTEND_URL,

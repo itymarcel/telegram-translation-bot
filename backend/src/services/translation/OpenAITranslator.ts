@@ -15,6 +15,7 @@ export class OpenAITranslator {
     // Simple heuristic: check for Italian-specific characters and common words
     const italianIndicators = [
       'è', 'à', 'ì', 'ò', 'ù',
+      'il', 'la', 'lo', 'gli', 'le', 'di', 'da', 'in', 'su', 'a',
       'che', 'per', 'una', 'sono', 'con', 'della', 'dei', 'nel', 'anche',
       'questo', 'questa', 'molto', 'più', 'può', 'però'
     ];
