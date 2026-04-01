@@ -6,7 +6,7 @@ export class OpenAITranslator {
   private openai: OpenAI;
   private model: string;
 
-  constructor(apiKey: string, model = 'gpt-4-turbo-preview') {
+  constructor(apiKey: string, model = 'gpt-4o') {
     this.openai = new OpenAI({ apiKey });
     this.model = model;
   }

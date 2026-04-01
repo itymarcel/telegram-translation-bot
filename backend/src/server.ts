@@ -16,7 +16,7 @@ dotenv.config();
 
 const PORT = process.env.PORT || 3000;
 const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
-const OPENAI_MODEL = process.env.OPENAI_MODEL || 'gpt-4-turbo-preview';
+const OPENAI_MODEL = process.env.OPENAI_MODEL || 'gpt-4o';
 const TELEGRAM_BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN;
 const TELEGRAM_USE_WEBHOOK = process.env.TELEGRAM_USE_WEBHOOK === 'true';
 const WEBHOOK_URL = process.env.WEBHOOK_URL; // e.g., https://your-app.up.railway.app
